@@ -144,8 +144,10 @@ def draw_icon(size: int) -> Image.Image:
 def generate_ico(output_path: str) -> Image.Image:
     """生成多尺寸 .ico：每个尺寸独立绘制，再打包。"""
     frames = [draw_icon(s) for s in ICO_SIZES]
-    # 第一张作为主文件，后续追加
-    frames[0].save(output_path, format='ICO', append_images=frames[1:])
+    # 必须以最大尺寸作主图：Pillow 会跳过比主图更大的尺寸，用 16px 当主图只会剩 1 帧。
+    # 各尺寸都有独立绘制的帧，Pillow 按尺寸精确匹配取用，不做缩放。
+    frames[-1].save(output_path, format='ICO', sizes=[(s, s) for s in ICO_SIZES],
+                    append_images=frames[:-1])
     return frames[-1]
 
 
